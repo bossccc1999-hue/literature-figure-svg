@@ -14,10 +14,10 @@ It is a vector-redraw workflow, not a one-click bitmap tracer. Diagrams and char
 
 ## Install
 
-Copy this folder into your Codex skills directory:
+Clone the repository into your Codex skills directory:
 
 ```bash
-cp -R literature-figure-svg ~/.codex/skills/
+git clone https://github.com/bossccc1999-hue/literature-figure-svg.git ~/.codex/skills/literature-figure-svg
 ```
 
 Then invoke it as `$literature-figure-svg`, or let Codex use it automatically when the request matches literature-figure SVG conversion.
