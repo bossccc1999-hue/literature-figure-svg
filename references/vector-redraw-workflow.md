@@ -36,7 +36,7 @@ Do not:
    - consistent line width;
    - short labels inside the figure;
    - long explanations in README, caption, or manuscript text.
-4. Export SVG with editable text and PDF/PNG preview when needed.
+4. Export SVG with editable text plus native PPTX and PNG preview by default (respect an explicit SVG-only request). Read [native PowerPoint workflow](native-powerpoint-workflow.md); normalize clipping/rounded paths/markers and build native shapes/text instead of embedding an SVG and relying on Convert to Shape.
 5. Compare against the source figure for missing modules, wrong arrows, changed labels, or accidental layout drift.
 
 ## Figure-Type Notes
@@ -55,3 +55,6 @@ Do not:
 - No clipped labels or overlapping legends.
 - Black-and-white print remains understandable through line style, marker shape, or hierarchy.
 - Raster components are intentionally embedded and documented, not accidental low-resolution leftovers.
+
+- Compare grouped and fully expanded temporary PPTX copies after checking identity group transforms.
+- Record which renderers/applications were checked and any native shading approximation.

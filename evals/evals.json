@@ -1,0 +1,54 @@
+{
+  "skill_name": "literature-figure-svg",
+  "evals": [
+    {
+      "id": 1,
+      "name": "raster_mechanism_pdf_to_native_ppt",
+      "prompt": "附上的 mechanism_raster.pdf 是我自己画的机制示意图。请先判断PDF里面是图片还是矢量，再把结构、箭头、细菌、晶体和文字重建成可编辑SVG，并给一份可以在PowerPoint中取消组合继续编辑的PPTX。以前转换为形状会丢箭头、圆角和渐变，这次请验证。",
+      "files": ["evals/fixtures/mechanism_raster.pdf"],
+      "fixture_contract": "The included original illustrative schematic is embedded as a raster image in a PDF and tests content routing. For a full visual compatibility regression, additionally supply a user-owned mechanism diagram with gradients and clipping. The .pdf extension is deliberately not evidence of vector content.",
+      "expected_output": "An evidence-based raster-content diagnosis, semantic redraw SVG, native editable PPTX, preview, assumptions and structural/render QA; no claim that the original raster was already vector.",
+      "expectations": [
+        "Runs inspect_pdf.py and identifies image content; does not equate PDF with vectors.",
+        "Reconstructs mechanism objects and editable text; does not embed the entire bitmap and call it fully editable vector.",
+        "Uses native PPTX shapes and text for editing rather than instructing the user to depend on SVG Convert to Shape.",
+        "Protects rounded capsule geometry, explicit arrowheads, clipping results, gradients and text sizing.",
+        "Runs audit_editability.py and compares grouped/flattened renders; claims real PowerPoint verification only if that operation actually occurred.",
+        "States any remaining visual approximations and does not invent quantitative source data."
+      ]
+    },
+    {
+      "id": 2,
+      "name": "vector_pdf_preserve_existing_geometry",
+      "prompt": "附上的 vector_figure.pdf 已经是导出的科研矢量图。请核实内部对象，尽量保留现有路径和文字做成可编辑SVG；再交付原生可编辑PPTX，保证取消组合后导管圆角、箭头和文字不变。不要先把PDF截图再描摹。",
+      "files": ["evals/fixtures/vector_figure.pdf"],
+      "fixture_contract": "The included original illustrative schematic has extractable text and real vector operators, capsule geometry and an arrow, with no raster illustration. For a full visual compatibility regression, additionally supply clipping, nested transforms and gradients where supported.",
+      "expected_output": "Vector-object inventory followed by a geometry-preserving SVG/native-PPT workflow, without unnecessary rasterization or an unsupported pixel-perfect guarantee.",
+      "expectations": [
+        "Verifies text spans, vector paths and image occurrences with inspect_pdf.py before choosing the route.",
+        "Preserves source vector geometry when practical; distinguishes editable text from outlined text.",
+        "Normalizes problematic SVG constructs or converts them into native PPTX shapes without relying on PowerPoint SVG conversion.",
+        "Audits native shape/text/gradient presence and unique IDs/references.",
+        "Only flattens a scratch PPTX after every group transform is verified identity; refuses unsafe flattening.",
+        "Reports visual comparison evidence and any renderer or font limitations."
+      ]
+    },
+    {
+      "id": 3,
+      "name": "empirical_microscopy_mixed_figure_keep_raster",
+      "prompt": "附上的 microscopy_mixed.pdf 有真实荧光显微照片、比例尺、实验统计图和旁边的机制示意图。帮我做成方便在PPT和Illustrator修改的图。真实显微照片是实验数据，不能重画、生成或改动细胞；原始图表数据我暂时没有。",
+      "files": [],
+      "manual_fixture_required": true,
+      "fixture_contract": "Provide a user-authorized mixed figure containing real microscopy raster panels, vector labels/scalebars, a mechanism diagram, and a plot without its raw data. Do not replace empirical images with fabricated fixtures and claim they are real microscopy.",
+      "expected_output": "A mixed editable figure retaining empirical raster evidence, editable labels and mechanism objects, and an explicit no-raw-data boundary for the plot; native PPTX supports editing intended objects.",
+      "expectations": [
+        "Inspects the PDF and records mixed content; performs visual classification because object counts cannot establish that an image is microscopy.",
+        "Preserves real microscopy as raster and adds editable vector annotations without generative replacement or fabricated cells.",
+        "Does not claim the complete figure is fully vector or treat intentional raster media as an audit failure.",
+        "Does not invent plot values; retains the supplied plot image or clearly labels any requested digitization as approximate.",
+        "Produces native editable PowerPoint labels/shapes and avoids dependence on SVG Convert to Shape.",
+        "Reports exactly which components are raster, editable text and editable vector geometry, with previews and audit results."
+      ]
+    }
+  ]
+}

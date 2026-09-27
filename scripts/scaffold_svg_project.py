@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import re
 from pathlib import Path
@@ -60,7 +61,7 @@ def build_readme(name: str, preset: dict[str, str | list[str]]) -> str:
 
 Project: `{name}`
 
-This folder is for redraw-based reconstruction of literature figures into editable SVG/PDF graphics.
+This folder is for redraw-based reconstruction of literature figures into editable SVG and directly editable native PPTX graphics (unless SVG-only is requested).
 
 ## Boundary
 
@@ -83,7 +84,11 @@ This folder is for redraw-based reconstruction of literature figures into editab
 - Editable vector objects are separated from raster evidence.
 - Text remains editable in SVG when technically possible.
 - Data source is marked as original-data, digitized, synthetic/demo, or unknown.
-- The figure does not copy the original pixels; it reconstructs the scientific structure and visual grammar.
+- Pure schematic content is semantic vector artwork; actual scientific image evidence stays raster.
+- When PPTX is requested, native PPTX uses native shapes/text; it does not require SVG conversion in PowerPoint.
+- Clipping, rounded corners, arrowheads, text/subscripts and gradients are checked.
+- When PPTX is requested, an ungrouped temporary copy is compared with the grouped file.
+- Only checks actually performed are marked passed in verification.json.
 - Source citation and any required attribution or permission are recorded.
 """
 
@@ -118,6 +123,9 @@ Choose one for each plot panel:
 - Fully vector-redrawn elements:
 - Raster elements intentionally retained:
 - Labels or symbols needing human confirmation:
+- Native gradient/shading approximations:
+- Unsupported source features and explicit handling:
+- Actual PowerPoint verification performed (or not performed):
 
 ## Do not change
 
@@ -135,7 +143,7 @@ def build_style_guide() -> str:
 - Use low-saturation colors and distinguish groups without relying only on color.
 - Keep labels short inside the figure; put long explanations in captions or README.
 - Preserve original panel labels and scientific relationships.
-- Use SVG/PDF as editable/vector-first outputs; use PNG only for preview or submission fallback.
+- Use SVG and native PPTX as editable outputs; PNG is preview only. Inspect PDF exports for intentional or renderer-created raster content.
 - For Matplotlib, keep text editable with `svg.fonttype = "none"` and PDF text as TrueType.
 """
 
@@ -205,16 +213,19 @@ if __name__ == "__main__":
 '''
 
 
-def create_project(output_dir: Path, name: str, figure_type: str, force: bool) -> Path:
+def create_project(output_dir: Path, name: str, figure_type: str, force: bool, svg_only: bool = False) -> Path:
     if figure_type not in PRESETS:
         raise SystemExit(f"Unknown type: {figure_type}. Valid types: {', '.join(sorted(PRESETS))}")
 
-    preset = PRESETS[figure_type]
+    preset = copy.deepcopy(PRESETS[figure_type])
+    if not svg_only:
+        preset["outputs"].append("outputs/pptx/figure_native.pptx")
+    preset["outputs"].append("outputs/preview/verification.json")
     project_dir = output_dir / slugify(name)
     if project_dir.exists() and any(project_dir.iterdir()) and not force:
         raise SystemExit(f"Output directory already exists and is not empty: {project_dir}")
 
-    for folder in ["data", "source_images", "outputs/svg", "outputs/pdf", "outputs/png_600dpi", "outputs/preview"]:
+    for folder in ["data", "source_images", "outputs/svg", "outputs/pdf", "outputs/png_600dpi", "outputs/preview", "outputs/pptx"]:
         (project_dir / folder).mkdir(parents=True, exist_ok=True)
 
     write_text(project_dir / "README.md", build_readme(name, preset))
@@ -267,6 +278,19 @@ def create_project(output_dir: Path, name: str, figure_type: str, force: bool) -
         "outputs": preset["outputs"],
         "editable_boundary": "Vector-redraw editable objects must be distinguished from retained raster evidence.",
     }
+    manifest["native_pptx_requested"] = not svg_only
+    manifest["status"] = "planned; scaffold only"
+    write_text(project_dir / "outputs" / "preview" / "verification.json", json.dumps({
+        "status": "pending",
+        "source_inventory": "pending",
+        "svg_text_geometry_visual_check": "pending",
+        "native_pptx_structure_check": "not-requested" if svg_only else "pending",
+        "native_pptx_render_check": "not-requested" if svg_only else "pending",
+        "ungrouped_copy_comparison": "not-requested" if svg_only else "pending",
+        "powerpoint_ui_check": "not-performed",
+        "retained_raster_content": [],
+        "known_approximations": []
+    }, ensure_ascii=False, indent=2) + "\n")
     write_text(project_dir / "manifest.json", json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
     return project_dir
 
@@ -276,13 +300,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-dir", default="outputs", help="Root output directory.")
     parser.add_argument("--name", default="literature_figure_svg", help="Project name.")
     parser.add_argument("--type", choices=sorted(PRESETS), default="multi-panel", help="Figure package type.")
+    parser.add_argument("--svg-only", action="store_true", help="Exclude the default native PPTX companion when requested.")
     parser.add_argument("--force", action="store_true", help="Overwrite files in an existing package directory.")
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    project_dir = create_project(Path(args.output_dir), args.name, args.type, args.force)
+    project_dir = create_project(Path(args.output_dir), args.name, args.type, args.force, args.svg_only)
     print(project_dir)
 
 

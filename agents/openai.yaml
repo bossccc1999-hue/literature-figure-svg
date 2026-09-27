@@ -1,4 +1,4 @@
 interface:
-  display_name: "文献图转SVG"
-  short_description: "把论文截图、文献图、机制图和数据图重绘为可编辑 SVG/PDF 图件"
-  default_prompt: "使用 $literature-figure-svg 帮我把文献中的图片重绘成可编辑 SVG，并保留科学结构、图注边界和可复现说明。"
+  display_name: "文献图转SVG与原生PPT"
+  short_description: "识别 PDF 内容，重建可编辑 SVG 与无需转换形状的原生 PPTX，并验证取消组合效果"
+  default_prompt: "使用 $literature-figure-svg 将这份文献图或 PDF 转成可编辑 SVG，并同时提供可直接编辑的原生 PPTX；保留科学结构与真实图像证据，检查裁剪、圆角、箭头、文字和取消组合后的效果。"
